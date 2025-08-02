@@ -1,0 +1,23 @@
+TABLE: i_acct_account_group_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, agm_name, agm_parent_group_id, agm_atm_id, agm_balance_sheet_name, agm_include_in, agm_is_system, agm_sort_order, agm_ref_id, agm_ref_type, agm_is_child_ledger, agm_global_type, agm_key, agm_sub_ref_id
+
+TABLE: i_acct_account_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, acc_name, acc_agm_id, acc_description, acc_ref_id, acc_ref_type, acc_is_system, acc_is_deleted, acc_sub_ref_id, acc_sub_ref_type, acc_key, acc_print_name, acc_is_manage_ac_interest, acc_tcm_id, acc_interest_rate, acc_base_currency
+
+TABLE: i_acct_account_opening_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, aom_acc_id, aom_amount, aom_date, aom_fym_id, aom_type, aom_brm_id, aom_fc_amount, aom_bank_book_opening
+
+TABLE: i_acct_account_opening_refrence
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, aord_aom_id, aord_cr_dr_id, aord_amount, aord_ref_no, aord_ref_date, is_used_in_money_issue, remark, aord_fc_amount, aord_div_id
+
+TABLE: i_acct_account_sheet_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, asm_date, asm_sheet_id, asm_acc_id, asm_amount, asm_acc_type, asm_ref_no, asm_ref_type, asm_ref_unique_id, asm_doc_no, asm_doc_date, asm_deposit_date, asm_is_reconcile, asm_system_generated, asm_file_reference, asm_additional_ref_no, asm_narration, asm_audit, asm_audit_by, asm_audit_dnt, asm_clear_date, asm_brm_id, asm_grp_srno
+
+TABLE: i_acct_account_type_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, atm_name, atm_parent_type, atm_is_system_type
+
+TABLE: i_conf_financial_year_mst
+COLUMNS: id, comp_id, status, create_by, create_ip, create_dnt, modify_by, modify_ip, modify_dnt, fym_name, fym_start_date, fym_end_date, fym_is_current, fym_is_locked, fym_audit_lock, fym_audit_dnt, fym_month_locked_ids
+
+TABLE: viewAccountDetail
+COLUMNS:  asm_date, asm_brm_id, asm_acc_id, acc_agm_id, DRAMT, CRAMT, DRAMT_USD, CRAMT_USD, is_reconcile, comp_id
