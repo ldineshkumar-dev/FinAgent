@@ -1,21 +1,24 @@
 from langchain_core.prompts import PromptTemplate
 
 TABLE_SELECTOR_PROMPT = PromptTemplate.from_template(
-    """You are a database schema expert. Your task is to identify the relevant tables needed to answer a user's question based on the full database schema.
+    """You are an expert at analyzing database schemas. Your task is to identify the necessary tables to answer a user's question.
 
 **Instructions:**
-1.  Analyze the user's question.
-2.  Analyze the provided list of table definitions.
-3.  Return a comma-separated list of ONLY the table names that are essential for answering the question.
-4.  Do NOT include any other text, explanations, or formatting.
+1.  Carefully read the user's question.
+2.  Examine the provided database schema, paying close attention to the `CREATE TABLE` statements, column names, and especially the `FOREIGN KEY` relationships which define how tables are linked.
+3.  Return a comma-separated list of ONLY the table names that are absolutely essential for answering the question. Include tables needed for joins.
+4.  Do NOT include views unless they are directly mentioned or clearly relevant.
+5.  Do NOT output any text other than the comma-separated list of table names.
 
 **Example:**
-User Question: "Which customers have overdue invoices?"
-Schema: CREATE TABLE customers (...); CREATE TABLE invoices (...); CREATE TABLE products (...);
-Output: customers,invoices
+User Question: "What is the name of the department with the highest total sales?"
+Schema: 
+CREATE TABLE sales (id INT, department_id INT, amount DECIMAL, FOREIGN KEY (department_id) REFERENCES departments(id));
+CREATE TABLE departments (id INT, name VARCHAR);
+Output: sales,departments
 
 **Full Database Schema:**
-```
+```sql
 {schema}
 ```
 
@@ -29,17 +32,16 @@ Output: customers,invoices
 
 
 SQL_GENERATOR_PROMPT = PromptTemplate.from_template(
-    """You are a hyper-focused DuckDB expert. Your ONLY task is to generate a single, syntactically correct DuckDB SQL query based on a user's question and a provided database schema.
+    """You are a hyper-focused DuckDB SQL query writer. Your ONLY task is to generate a single, syntactically correct DuckDB SQL query based on a user's question and a detailed database schema.
 
 **CRITICAL Instructions:**
-1.  **ONLY output the raw SQL query.** Do NOT include any explanations, comments, markdown formatting, or any text other than the SQL code itself.
-2.  **Strictly adhere to the schema.** The query MUST ONLY use the tables and columns listed in the provided schema.
-3.  **Do NOT invent or hallucinate table or column names.** If a table or column does not exist in the schema, you must not use it.
-4.  **Validate column references.** Before using a column in a `SELECT`, `WHERE`, or `JOIN` clause, ensure that its parent table is correctly listed in the `FROM` or `JOIN` clauses. The error "Referenced column not found in FROM clause" occurs when this rule is broken.
-5.  **Double-check your work.** Before outputting the query, verify that every table and column used is present in the schema below and that all join logic is correct.
+1.  **Use the Schema for Joins:** The provided schema includes `FOREIGN KEY` constraints. Use these relationships to construct all `JOIN` clauses accurately. For example, if `table_a.col_x` references `table_b.col_y`, the join should be `ON table_a.col_x = table_b.col_y`.
+2.  **Adhere Strictly to the Schema:** The query MUST ONLY use the tables and columns explicitly defined in the schema. Do not invent or assume any table or column names.
+3.  **Validate Column References:** Ensure every column in a `SELECT`, `WHERE`, or `JOIN` clause belongs to a table listed in the `FROM` or `JOIN` clauses.
+4.  **Output ONLY the SQL Query:** Do not include any explanations, comments, markdown formatting, or any text other than the raw SQL code.
 
 **Database Schema:**
-```
+```sql
 {schema}
 ```
 
@@ -52,15 +54,16 @@ SQL_GENERATOR_PROMPT = PromptTemplate.from_template(
 )
 
 SQL_CORRECTOR_PROMPT = PromptTemplate.from_template(
-    """You are a SQL correction expert. A previously generated SQL query failed. Your task is to analyze the original question, the database schema, the failed query, and the resulting error message to generate a new, corrected SQL query.
+    """You are a SQL debugger. A previously generated query failed. Your task is to analyze the original question, the detailed schema, the failed query, and the error message to generate a corrected SQL query.
 
 **CRITICAL Instructions:**
-1.  Pay close attention to the error message. It contains the key to fixing the query.
-2.  Focus on correcting the specific error. Do not change the query's intent.
-3.  ONLY output the raw, corrected SQL query. Do not include any explanations or other text.
+1.  **Analyze the Error:** The error message is the most important clue. Identify the root cause, such as a missing join, incorrect column name, or invalid syntax.
+2.  **Consult the Schema:** Use the `FOREIGN KEY` relationships in the schema to fix incorrect `JOIN` conditions. Verify all table and column names against the schema.
+3.  **Correct the Logic:** Fix the specific error without changing the original intent of the query.
+4.  **Output ONLY the Corrected SQL:** Do not include any explanations or other text.
 
 **Database Schema:**
-```
+```sql
 {schema}
 ```
 
@@ -84,11 +87,22 @@ SQL_CORRECTOR_PROMPT = PromptTemplate.from_template(
 
 ANSWER_FORMATTER_PROMPT = PromptTemplate.from_template(
     """
-    You are an AI assistant. Given a user question and the result of a SQL query, provide a user-friendly, natural language answer.
+    You are a friendly AI financial assistant. Your task is to provide a clear, concise, and user-friendly answer based on a user's question and the result of a database query.
 
-    User Question: {question}
-    SQL Result: {result}
+**Instructions:**
+1.  If the result is a single value or a short list, present it in a natural language sentence.
+2.  If the result is a table, summarize the key findings. Do not just repeat the data.
+3.  If the result is empty, state that no data was found for the user's request.
+4.  Keep the tone professional but approachable.
 
-    Answer:
-    """
+**User Question:**
+{question}
+
+**Data from Database:**
+```
+{result}
+```
+
+**Answer:**
+"""
 )

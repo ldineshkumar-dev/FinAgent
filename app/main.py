@@ -5,14 +5,17 @@ from app.agents.table_selector import select_tables
 from app.agents.sql_generator import generate_sql
 from app.agents.sql_executor import execute_sql
 from app.agents.sql_reflector import reflect_on_error
-from app.agents.answer_formatter import format_answer
+from app.agents.answer_formatter import format_answer_with_ai, display_direct_answer, LARGE_RESULT_THRESHOLD
 from app.config import SCHEMA_PATH
 
 # Conditional logic for the graph
-def should_continue(state):
+def route_after_sql(state):
+    """Decides the next step after SQL execution."""
     if state.get("error") and state.get("retries", 0) < 2:
         return "reflect_on_error"  # If error and retries are left, reflect
-    return "format_answer"  # Otherwise, format the answer (or error message)
+    if state.get("row_count", 0) > LARGE_RESULT_THRESHOLD:
+        return "direct_answer" # If rows are too many, display directly
+    return "format_answer_with_ai"  # Otherwise, format with AI
 
 def run_graph(question: str):
     """Runs the agentic graph"""
@@ -29,7 +32,8 @@ def run_graph(question: str):
     workflow.add_node("generate_sql", generate_sql)
     workflow.add_node("execute_sql", execute_sql)
     workflow.add_node("reflect_on_error", reflect_on_error)
-    workflow.add_node("format_answer", format_answer)
+    workflow.add_node("format_answer_with_ai", format_answer_with_ai)
+    workflow.add_node("direct_answer", display_direct_answer)
 
     # Build graph
     workflow.set_entry_point("select_tables")
@@ -37,14 +41,16 @@ def run_graph(question: str):
     workflow.add_edge("generate_sql", "execute_sql")
     workflow.add_conditional_edges(
         "execute_sql",
-        should_continue,
+        route_after_sql,
         {
             "reflect_on_error": "reflect_on_error",
-            "format_answer": "format_answer"
+            "direct_answer": "direct_answer",
+            "format_answer_with_ai": "format_answer_with_ai"
         }
     )
     workflow.add_edge("reflect_on_error", "generate_sql") # Loop back to try generating SQL again
-    workflow.add_edge("format_answer", END)
+    workflow.add_edge("format_answer_with_ai", END)
+    workflow.add_edge("direct_answer", END)
 
     # Compile
     app = workflow.compile()
