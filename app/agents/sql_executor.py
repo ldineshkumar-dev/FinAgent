@@ -2,7 +2,7 @@ import duckdb
 from app.config import DB_PATH
 
 def execute_sql(state):
-    """Execute SQL query"""
+    """Execute SQL query and handle errors"""
     print("---EXECUTE SQL---")
     sql_query = state["sql_query"]
 
@@ -11,8 +11,7 @@ def execute_sql(state):
         result = conn.execute(sql_query).fetchdf()
         conn.close()
         result_str = result.to_string()
+        return {"result": result_str, "error": None}
     except Exception as e:
-        result_str = f"Error executing query: {e}"
-
-    print(f"Result: {result_str}")
-    return {"result": result_str}
+        print(f"SQL Execution Error: {e}")
+        return {"result": "", "error": str(e)}

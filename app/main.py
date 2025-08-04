@@ -4,8 +4,15 @@ from app.graph import AgentState
 from app.agents.table_selector import select_tables
 from app.agents.sql_generator import generate_sql
 from app.agents.sql_executor import execute_sql
+from app.agents.sql_reflector import reflect_on_error
 from app.agents.answer_formatter import format_answer
 from app.config import SCHEMA_PATH
+
+# Conditional logic for the graph
+def should_continue(state):
+    if state.get("error") and state.get("retries", 0) < 2:
+        return "reflect_on_error"  # If error and retries are left, reflect
+    return "format_answer"  # Otherwise, format the answer (or error message)
 
 def run_graph(question: str):
     """Runs the agentic graph"""
@@ -15,27 +22,35 @@ def run_graph(question: str):
     except FileNotFoundError:
         return f"Error: The schema file could not be found at {SCHEMA_PATH}. Please ensure it exists."
 
-
     workflow = StateGraph(AgentState)
 
     # Define the nodes
     workflow.add_node("select_tables", select_tables)
     workflow.add_node("generate_sql", generate_sql)
     workflow.add_node("execute_sql", execute_sql)
+    workflow.add_node("reflect_on_error", reflect_on_error)
     workflow.add_node("format_answer", format_answer)
 
     # Build graph
     workflow.set_entry_point("select_tables")
     workflow.add_edge("select_tables", "generate_sql")
     workflow.add_edge("generate_sql", "execute_sql")
-    workflow.add_edge("execute_sql", "format_answer")
+    workflow.add_conditional_edges(
+        "execute_sql",
+        should_continue,
+        {
+            "reflect_on_error": "reflect_on_error",
+            "format_answer": "format_answer"
+        }
+    )
+    workflow.add_edge("reflect_on_error", "generate_sql") # Loop back to try generating SQL again
     workflow.add_edge("format_answer", END)
 
     # Compile
     app = workflow.compile()
 
     # Run
-    inputs = {"question": question, "schema": schema}
+    inputs = {"question": question, "schema": schema, "retries": 0}
     result = app.invoke(inputs)
 
     return result['answer']

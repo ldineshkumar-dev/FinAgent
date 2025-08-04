@@ -51,6 +51,37 @@ SQL_GENERATOR_PROMPT = PromptTemplate.from_template(
 **SQL Query:**"""
 )
 
+SQL_CORRECTOR_PROMPT = PromptTemplate.from_template(
+    """You are a SQL correction expert. A previously generated SQL query failed. Your task is to analyze the original question, the database schema, the failed query, and the resulting error message to generate a new, corrected SQL query.
+
+**CRITICAL Instructions:**
+1.  Pay close attention to the error message. It contains the key to fixing the query.
+2.  Focus on correcting the specific error. Do not change the query's intent.
+3.  ONLY output the raw, corrected SQL query. Do not include any explanations or other text.
+
+**Database Schema:**
+```
+{schema}
+```
+
+**Original User Question:**
+```
+{question}
+```
+
+**The FAILED SQL Query:**
+```sql
+{sql_query}
+```
+
+**The Error Message:**
+```
+{error}
+```
+
+**Corrected SQL Query:**"""
+)
+
 ANSWER_FORMATTER_PROMPT = PromptTemplate.from_template(
     """
     You are an AI assistant. Given a user question and the result of a SQL query, provide a user-friendly, natural language answer.
