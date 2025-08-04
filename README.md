@@ -61,3 +61,5 @@ This entire process is orchestrated seamlessly by **LangGraph**, ensuring a resi
 *A snapshot of the new, redesigned user interface.*
 
 ![App Screenshot](./data/UI%20Screenshot.png)
+
+![App Screenshot](./data/UI%20Screenshot%202.png)
