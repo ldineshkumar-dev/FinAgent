@@ -1,5 +1,5 @@
 from app.config import get_groq_api_key
-from app.prompts import SQL_GENERATOR_PROMPT
+from app.prompts import DEFAULT_SQL_PROMPT
 from langchain_groq import ChatGroq
 
 def generate_sql(state):
@@ -12,7 +12,7 @@ def generate_sql(state):
     llm = ChatGroq(model="llama3-8b-8192", groq_api_key=get_groq_api_key())
 
     # Prompt
-    prompt = SQL_GENERATOR_PROMPT.format(question=question, schema=schema)
+    prompt = DEFAULT_SQL_PROMPT.format(question=question, schema=schema)
 
     # Generate SQL
     sql_query = llm.invoke(prompt).content

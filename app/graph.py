@@ -4,6 +4,8 @@ import pandas as pd
 
 class AgentState(TypedDict):
     question: str
+    # The user's intent, classified as "sql_query" or "non_sql_query".
+    intent: str
     schema: str
     sql_query: str
     result: pd.DataFrame
