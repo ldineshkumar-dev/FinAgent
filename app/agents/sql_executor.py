@@ -8,11 +8,13 @@ def execute_sql(state):
     sql_query = state["sql_query"]
 
     try:
-        conn = duckdb.connect(DB_PATH, read_only=True)
-        result_df = conn.execute(sql_query).fetchdf()
-        conn.close()
+        # Use a 'with' statement to ensure the connection is always closed
+        with duckdb.connect(DB_PATH, read_only=True) as conn:
+            result_df = conn.execute(sql_query).fetchdf()
         
         row_count = len(result_df)
+        if row_count <= 10:
+            print(result_df)
         print(f"Query returned {row_count} rows.")
 
         return {"result": result_df, "row_count": row_count, "error": None}

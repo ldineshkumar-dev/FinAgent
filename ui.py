@@ -1,6 +1,6 @@
 import streamlit as st
-import time
 from app.main import run_graph
+from app.history import load_chat_history, save_chat_history
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -74,6 +74,27 @@ st.markdown("""
         flex-grow: 1;
         font-size: 1rem;
         line-height: 1.6;
+        word-wrap: break-word;
+    }
+
+    /* Styling for HTML tables from pandas */
+    .dataframe {
+        width: 100%;
+        border-collapse: collapse;
+        color: #EAEAEA;
+        font-size: 0.9rem;
+    }
+    .dataframe th, .dataframe td {
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        text-align: left;
+    }
+    .dataframe th {
+        background-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+    }
+    .dataframe tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
     }
     
     /* Sidebar */
@@ -126,22 +147,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- State Initialization ---
+if "all_chats" not in st.session_state:
+    st.session_state.all_chats = load_chat_history()
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "Hello! How can I assist you with your financial data today?"}]
+
 # --- Sidebar Content ---
 with st.sidebar:
     st.title("MFT Finance AI")
-    st.markdown("---")
     
-    if st.button("🗑️ Clear Chat History"):
-        st.session_state.messages = [{"role": "assistant", "content": "Chat history cleared. How can I help you now?"}]
+    if st.button("✨ New Chat"):
+        # Save the old chat before starting a new one
+        st.session_state.all_chats = save_chat_history(st.session_state.all_chats, st.session_state.messages)
+        st.session_state.messages = [{"role": "assistant", "content": "New chat started. How can I help?"}]
         st.rerun()
 
-    st.markdown("### How It Works")
-    st.info(
-        "This AI assistant uses a multi-agent system to understand your question, query the database, and deliver a natural language answer."
-    )
+    st.markdown("---")
+    st.markdown("### Chat History")
+    if not st.session_state.all_chats:
+        st.caption("No past chats yet.")
+    else:
+        for i, chat in enumerate(st.session_state.all_chats):
+            # Use the first user message as a preview, or default text
+            preview = next((msg['content'] for msg in chat['messages'] if msg['role'] == 'user'), 'Chat')
+            if st.button(f"📜 {chat['timestamp']} - {preview[:30]}...", key=f"history_{i}"):
+                st.session_state.messages = chat['messages']
+                st.rerun()
+
+    st.markdown("---")
     st.markdown("### Example Questions")
-    st.code("What was the total revenue last quarter?")
-    st.code("Show all transactions for 'marketing'")
+    st.code("List all the financial year available?")
+    st.code("How many accounts were created each year?")
     
     st.markdown("---")
     st.markdown("Built with **Gemini & LangGraph**")
@@ -150,11 +188,6 @@ with st.sidebar:
 # --- Main Chat Interface ---
 st.title("✨ MFT Finance AI Assistant")
 st.caption("Your intelligent, conversational gateway to financial data.")
-
-# Initialize or display welcome screen
-if "messages" not in st.session_state or len(st.session_state.messages) <= 1:
-    st.session_state.messages = [{"role": "assistant", "content": "Hello! How can I assist you with your financial data today?"}]
-    # You can add a more elaborate welcome screen here if desired
 
 # Chat history container
 chat_history_container = st.container()
@@ -205,4 +238,9 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
             error_message = f"Sorry, an error occurred: {str(e)}. Please try rephrasing your question."
             st.session_state.messages.append({"role": "assistant", "content": error_message})
     
+    # Save the updated chat history after getting a response
+    st.session_state.all_chats = save_chat_history(st.session_state.all_chats, st.session_state.messages)
     st.rerun()
+
+# Add some padding at the bottom to make space for the fixed input form
+st.markdown("<div style='padding-bottom: 5rem;'></div>", unsafe_allow_html=True)

@@ -28,18 +28,19 @@ def format_answer_with_ai(state):
     return {"answer": answer}
 
 def display_direct_answer(state):
-    """Formats a direct answer for large tabular data, bypassing the LLM."""
+    """Formats a direct answer for large tabular data as an HTML table."""
     print("---DISPLAYING DIRECT ANSWER---")
     result_df = state["result"]
     row_count = state["row_count"]
 
-    # Convert DataFrame to markdown for display in Streamlit
-    table_md = result_df.head(LARGE_RESULT_THRESHOLD).to_markdown(index=False)
+    # Convert DataFrame to HTML, adding a class for styling and removing the border
+    table_html = result_df.head(LARGE_RESULT_THRESHOLD).to_html(index=False, classes='dataframe', border=0)
     
+    # Combine the intro text and the HTML table
     answer = (
-        f"The query returned {row_count} rows. "
-        f"Here are the first {min(row_count, LARGE_RESULT_THRESHOLD)} results:\n\n"
-        f"{table_md}"
+        f"<p>{row_count} rows were returned. "
+        f"Displaying the first {min(row_count, LARGE_RESULT_THRESHOLD)} results:</p>"
+        f"{table_html}"
     )
     
     return {"answer": answer}
