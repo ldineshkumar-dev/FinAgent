@@ -1,58 +1,49 @@
-# 🚀 MFT Finance AI Assistant - Efficient Edition
+# 🚀 MFT Finance AI Assistant
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-optimized-brightgreen" alt="Status"/>
+  <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status"/>
   <img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python version"/>
-  <img src="https://img.shields.io/badge/efficiency-80%25_faster-green" alt="Efficiency"/>
   <img src="https://img.shields.io/badge/local-SLM-orange" alt="Local SLM"/>
 </p>
 
-An ultra-efficient, cost-effective AI assistant that transforms natural language questions into SQL queries using **semantic similarity search** and **local Small Language Models (SLM)**.
-
-## 🎯 Revolutionary Efficiency
-
-**Previous System:** 5 LLM API calls per query
-**New System:** 1 local SLM call per query
-
-**Result:** 80% reduction in latency and costs!
+An AI assistant that transforms your natural language questions into SQL queries. It runs completely offline, using **semantic similarity search** and a **local Small Language Model (SLM)** to give you fast, accurate, and private results.
 
 ## ✨ Core Features
 
-* **Single SLM Call Architecture**: Eliminates expensive multi-agent workflows
-* **Semantic Table Discovery**: Vector embeddings replace LLM-based table selection
-* **Local Processing**: No API dependencies - runs completely offline
-* **Lightning Fast**: Sub-second response times with vector similarity search
-* **Cost Effective**: Minimal computational overhead
-* **Smart Schema Understanding**: Embeddings capture table relationships and semantics
+*   **Natural Language to SQL**: Ask questions in plain English and get SQL queries back.
+*   **Semantic Table Discovery**: Automatically finds the most relevant tables for your query using vector embeddings.
+*   **100% Local**: Runs completely offline. No API calls, no data ever leaves your machine.
+*   **Fast & Responsive**: Get near-instant responses thanks to vector similarity search.
+*   **Smart Schema Understanding**: Understands your database structure, including table relationships and column meanings.
+*   **Cost-Effective**: No API fees or expensive computational overhead.
 
-## 🏗️ System Architecture
+## 🏗️ How It Works
+
+The system follows a simple yet powerful workflow:
 
 ```
 User Query → Query Embeddings → Vector Similarity Search → Relevant Tables → Local SLM → SQL Generation → Execution → Results
 ```
 
-### Workflow Breakdown
+1.  **📊 Database Preprocessing** (One-time setup)
+    *   The database schema is parsed to understand its structure.
+    *   Semantic embeddings (vector representations) are generated for all tables and columns.
+    *   These embeddings are stored in a local vector database for fast lookups.
 
-1. **📊 Database Preprocessing** (One-time setup)
-   - Parse database schema into table/column descriptions
-   - Generate semantic embeddings for all database entities
-   - Store embeddings in local vector database
-
-2. **🔍 Query Processing** (Runtime)
-   - Convert user query to embeddings
-   - Perform similarity search to find relevant tables
-   - Pass relevant schema + query to local SLM
-   - Generate and execute SQL
-   - Return formatted results
+2.  **🔍 Query Processing** (At runtime)
+    *   Your question is converted into an embedding.
+    *   The system searches the vector database to find the most semantically similar tables.
+    *   The relevant schema information and your question are passed to the local SLM.
+    *   The SLM generates the SQL query, which is then executed to fetch the results.
 
 ## 🛠️ Technology Stack
 
-* **Local SLM**: Phi-3-Mini (3.8B parameters) - Optimized for code generation
-* **Embeddings**: Sentence-Transformers (all-MiniLM-L6-v2)
-* **Vector Database**: ChromaDB for fast similarity search
-* **Database**: DuckDB for analytical queries
-* **Backend**: Python with clean modular architecture
-* **Frontend**: Streamlit for interactive interface
+*   **Local SLM**: Phi-3-Mini (3.8B parameters) - Optimized for code generation.
+*   **Embeddings**: Sentence-Transformers (all-MiniLM-L6-v2).
+*   **Vector Database**: ChromaDB for fast similarity search.
+*   **Database**: DuckDB for analytical queries.
+*   **Backend**: Python.
+*   **Frontend**: Streamlit for the interactive interface.
 
 ## 📁 Project Structure
 
@@ -93,29 +84,30 @@ python main.py --init-embeddings
 streamlit run ui.py
 ```
 
-### First Time Setup
+### First-Time Setup
 
-The system will automatically:
-1. Parse your database schema
-2. Generate embeddings for all tables and columns
-3. Create a local vector database
-4. Download and cache the local SLM model
+On the first run, the system will automatically:
+1.  Parse your database schema.
+2.  Generate and store embeddings for all tables and columns.
+3.  Create a local vector database.
+4.  Download and cache the local SLM model.
 
 ## 💡 Example Usage
 
-**Question**: "What is the average interest rate among all accounts?"
+**Your Question**: "What is the average interest rate among all accounts?"
 
 **System Process**:
-1. Query → Embeddings
-2. Find relevant tables: `i_acct_account_mst`, `i_acct_interest_config`
-3. Local SLM generates: `SELECT AVG(interest_rate) FROM i_acct_account_mst a JOIN i_acct_interest_config i ON a.id = i.account_id`
-4. Execute & return result
-
-**Response Time**: < 500ms (vs 3-5s with previous system)
+1.  The query is converted to an embedding.
+2.  The system identifies `i_acct_account_mst` and `i_acct_interest_config` as the most relevant tables.
+3.  The local SLM generates the following SQL:
+    ```sql
+    SELECT AVG(interest_rate) FROM i_acct_account_mst a JOIN i_acct_interest_config i ON a.id = i.account_id
+    ```
+4.  The query is executed, and the result is returned in under a second.
 
 ## 🔧 Configuration
 
-Edit `src/config.py` to customize:
+You can customize the models and settings in `src/config.py`:
 
 ```python
 # Model settings
@@ -131,36 +123,27 @@ VECTOR_BATCH_SIZE = 100
 CACHE_EMBEDDINGS = True
 ```
 
-## 📊 Performance Comparison
-
-| Metric | Previous System | New System | Improvement |
-|--------|----------------|------------|-------------|
-| LLM Calls | 5 per query | 1 per query | 80% reduction |
-| Response Time | 3-5 seconds | <500ms | 85% faster |
-| API Costs | $0.02 per query | $0.00 per query | 100% savings |
-| Offline Capability | ❌ | ✅ | Full offline |
-
 ## 🎯 Key Advantages
 
-1. **Efficiency**: Single model call vs multi-agent pipeline
-2. **Speed**: Vector search + local inference
-3. **Cost**: No API fees, minimal compute requirements
-4. **Privacy**: Complete local processing
-5. **Reliability**: No network dependencies
-6. **Scalability**: Easy to add new databases
+*   **Efficient**: Uses a single, local model call for SQL generation.
+*   **Fast**: Combines vector search with local inference for quick results.
+*   **Cost-Effective**: Runs locally with no API fees.
+*   **Private**: All data and queries are processed on your machine.
+*   **Reliable**: Works offline without any network dependencies.
+*   **Scalable**: Can be easily extended to support new databases.
 
 ## 🔮 Future Enhancements
 
--  Multi-database support
-- Query result caching
--  Advanced SQL optimization
--  Natural language result explanations
-- Query history and learning
+-    Multi-database support
+-    Query result caching
+-    Advanced SQL optimization
+-    Natural language explanations for results
+-    Query history and learning
 
 ## 📝 License
 
-MIT License - Feel free to use this efficient approach in your projects!
+This project is licensed under the MIT License.
 
 ---
 
-**Built with ❤️ for efficiency and performance**
+**Built with ❤️ for efficiency and performance.**
