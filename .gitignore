@@ -9,3 +9,7 @@ venv/
 .env
 .venv/
 .venv-old/
+chroma.sqlite3
+.bin/
+.pytest_cache/
+embeddings/
