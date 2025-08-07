@@ -3,47 +3,125 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status"/>
   <img src="https://img.shields.io/badge/python-3.9+-blue.svg" alt="Python version"/>
-  <img src="https://img.shields.io/badge/local-SLM-orange" alt="Local SLM"/>
+  <img src="https://img.shields.io/badge/local--first-100%25-orange" alt="Local First"/>
+  <img src="https://img.shields.io/badge/privacy-enhanced-blue" alt="Privacy Enhanced"/>
 </p>
 
-An AI assistant that transforms your natural language questions into SQL queries. It runs completely offline, using **semantic similarity search** and a **local Small Language Model (SLM)** to give you fast, accurate, and private results.
+<p align="center">
+  <strong>Ask questions in plain English. Get SQL answers.</strong>
+  <br />
+  An intelligent, offline-first AI assistant that translates natural language into accurate SQL queries, enabling you to interact with your database effortlessly.
+</p>
+
+---
 
 ## ✨ Core Features
 
-*   **Natural Language to SQL**: Ask questions in plain English and get SQL queries back.
-*   **Semantic Table Discovery**: Automatically finds the most relevant tables for your query using vector embeddings.
-*   **100% Local**: Runs completely offline. No API calls, no data ever leaves your machine.
-*   **Fast & Responsive**: Get near-instant responses thanks to vector similarity search.
-*   **Smart Schema Understanding**: Understands your database structure, including table relationships and column meanings.
-*   **Cost-Effective**: No API fees or expensive computational overhead.
+*   💬 **Natural Language to SQL**: Interact with your database using everyday language.
+*   🧠 **Smart Schema Analysis**: Automatically understands your database structure, including complex table relationships.
+*   🌐 **100% Offline**: Your data never leaves your machine. No API calls, no external dependencies.
+*   ⚡ **Lightning Fast**: Get near-instant query results powered by a local vector search.
+*   🔒 **Privacy by Design**: Ensures complete data confidentiality.
+*   💸 **Cost-Effective**: No API fees or expensive cloud compute.
 
-## 🏗️ How It Works
+---
 
-The system follows a simple yet powerful workflow:
 
-```
-User Query → Query Embeddings → Vector Similarity Search → Relevant Tables → Local SLM → SQL Generation → Execution → Results
-```
+### Workflow Explained Step-by-Step
 
-1.  **📊 Database Preprocessing** (One-time setup)
-    *   The database schema is parsed to understand its structure.
-    *   Semantic embeddings (vector representations) are generated for all tables and columns.
-    *   These embeddings are stored in a local vector database for fast lookups.
+#### Phase 1: One-Time Analysis
+This happens only once when you run the `--init-embeddings` command.
 
-2.  **🔍 Query Processing** (At runtime)
-    *   Your question is converted into an embedding.
-    *   The system searches the vector database to find the most semantically similar tables.
-    *   The relevant schema information and your question are passed to the local SLM.
-    *   The SLM generates the SQL query, which is then executed to fetch the results.
+1.  **Parse Schema**: The system reads your `db_schema.txt` file to learn the structure of your database, including all tables, columns, and their relationships.
+2.  **Generate Embeddings**: It then converts the *meaning* of every table and column into numerical representations called "embeddings" or "vectors".
+3.  **Store Embeddings**: These vectors are saved locally in a high-speed vector database (ChromaDB), creating a searchable, semantic map of your database.
+
+#### Phase 2: Live Query Processing
+This happens every time you ask a question.
+
+4.  **Vectorize Question**: Your plain English question is converted into a vector, just like the schema was.
+5.  **Semantic Search**: The system compares your question's vector against the schema vectors to find the most relevant tables and columns for your query. This is incredibly fast and efficient.
+6.  **Build Prompt**: A precise, context-rich prompt is constructed using your question and the relevant schema snippets.
+7.  **Generate SQL**: The prompt is sent to the local AI model, which, based on the context, generates the appropriate SQL query.
+8.  **Execute Query**: The generated SQL is run against your actual database.
+9.  **Format Answer**: The results from the database are formatted into a clean, human-readable answer and presented to you.
+
+---
+
+## 🖥️ User Interface
+
+The application includes a simple and intuitive web interface built with **Streamlit**.
+
+*   **Interactive Chat**: Ask your questions in a clean, chat-like window.
+*   **Instant Results**: View the formatted answer directly in the UI.
+*   **SQL Transparency**: See the exact SQL query that was generated and executed for your question.
+*   **Easy to Use**: No complex setup required. Just run the command, and the interface opens in your browser.
+
+---
+
+## 💡 Sample Questions
+
+Here are a few examples of questions you can ask the assistant:
+
+*   "List all the financial years available."
+*   "For each group, list its parent group (if any)."
+*   "What is the sort order of each account group?"
+
+---
 
 ## 🛠️ Technology Stack
 
-*   **Local SLM**: Phi-3-Mini (3.8B parameters) - Optimized for code generation.
-*   **Embeddings**: Sentence-Transformers (all-MiniLM-L6-v2).
-*   **Vector Database**: ChromaDB for fast similarity search.
-*   **Database**: DuckDB for analytical queries.
-*   **Backend**: Python.
-*   **Frontend**: Streamlit for the interactive interface.
+| Component           | Technology                                       | Purpose                               |
+| ------------------- | ------------------------------------------------ | ------------------------------------- |
+| **AI Model**        |     `distilbert-base-uncased`             | Natural Language to SQL Generation    |
+| **Embeddings**      | `sentence-transformers/all-MiniLM-L6-v2`         | Semantic Representation of Schema     |
+| **Vector Database** | `ChromaDB`                                       | Fast Similarity Search                |
+| **Database**        | `DuckDB`                                         | Analytical Query Engine               |
+| **Backend**         | `Python`                                         | Core Application Logic                |
+| **Frontend**        | `Streamlit`                                      | Interactive User Interface            |
+
+---
+
+## 🚀 Quick Start
+
+Follow these steps to get the application running.
+
+### 1. Prerequisites
+
+*   **Python**: Ensure you have Python `3.9` or newer installed.
+
+### 2. Install Dependencies
+
+Open your terminal in the project root and run:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Initialize the System (One-Time Setup)
+
+Before the first run, you must initialize the system to analyze your database schema and create the necessary embeddings.
+
+```bash
+python main.py --init-embeddings
+```
+
+This process will:
+1.  Parse your database schema.
+2.  Download the required AI models.
+3.  Generate and store embeddings locally.
+
+### 4. Run the Application
+
+Start the interactive Streamlit interface:
+
+```bash
+streamlit run ui.py
+```
+
+Your web browser will open with the application, ready for you to ask questions!
+
+---
 
 ## 📁 Project Structure
 
@@ -52,98 +130,45 @@ MFT_Finance/
 ├── README.md
 ├── requirements.txt
 ├── main.py                    # Application entry point
+├── ui.py                      # Streamlit interface
 ├── data/
 │   └── finance_module.duckdb  # Financial database
+│   └── db_schema.txt          # Database schema definition
 ├── src/
-│   ├── schema_parser.py       # Database schema extraction
+│   ├── advanced_sql_generator.py # Advanced prompt engineering
 │   ├── embedding_service.py   # Embedding generation
+│   ├── schema_parser.py       # Database schema extraction
 │   ├── vector_store.py        # Vector similarity search
-│   ├── sql_generator.py       # Local SLM SQL generation
 │   ├── query_executor.py      # SQL execution & formatting
 │   └── config.py              # Configuration settings
-├── embeddings/                # Vector database storage
-└── ui.py                      # Streamlit interface
+└── embeddings/                # Local vector storage
 ```
 
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/ldineshkumar-dev/FinAgent
-cd FinAgent
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Initialize embeddings (one-time setup)
-python main.py --init-embeddings
-
-# Start the application
-streamlit run ui.py
-```
-
-### First-Time Setup
-
-On the first run, the system will automatically:
-1.  Parse your database schema.
-2.  Generate and store embeddings for all tables and columns.
-3.  Create a local vector database.
-4.  Download and cache the local SLM model.
-
-## 💡 Example Usage
-
-**Your Question**: "What is the average interest rate among all accounts?"
-
-**System Process**:
-1.  The query is converted to an embedding.
-2.  The system identifies `i_acct_account_mst` and `i_acct_interest_config` as the most relevant tables.
-3.  The local SLM generates the following SQL:
-    ```sql
-    SELECT AVG(interest_rate) FROM i_acct_account_mst a JOIN i_acct_interest_config i ON a.id = i.account_id
-    ```
-4.  The query is executed, and the result is returned in under a second.
+---
 
 ## 🔧 Configuration
 
-You can customize the models and settings in `src/config.py`:
+You can customize the models and vector search settings in `src/config.py`.
 
 ```python
 # Model settings
-SLM_MODEL = "microsoft/Phi-3-mini-4k-instruct"
+SLM_MODEL = "distilbert-base-uncased"  # Much smaller fallback model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Vector search settings
 SIMILARITY_THRESHOLD = 0.7
 MAX_RELEVANT_TABLES = 5
-
-# Performance settings
-VECTOR_BATCH_SIZE = 100
-CACHE_EMBEDDINGS = True
 ```
-
-## 🎯 Key Advantages
-
-*   **Efficient**: Uses a single, local model call for SQL generation.
-*   **Fast**: Combines vector search with local inference for quick results.
-*   **Cost-Effective**: Runs locally with no API fees.
-*   **Private**: All data and queries are processed on your machine.
-*   **Reliable**: Works offline without any network dependencies.
-*   **Scalable**: Can be easily extended to support new databases.
 
 ## 🔮 Future Enhancements
 
 -    Multi-database support
 -    Query result caching
--    Advanced SQL optimization
 -    Natural language explanations for results
--    Query history and learning
+-    User-specific query history and learning
 
 ## 📝 License
 
 This project is licensed under the MIT License.
 
 ---
-
-**Built with ❤️ for efficiency and performance.**
